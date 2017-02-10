@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html ng-app="countryApp">
+  <head>
+    <meta charset="utf-8">
+    <title ng-bind="'countryApp'">{{title}}</title>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.1/angular.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.10/angular-route.min.js"></script>
+    <script>
+      var countryApp = angular.module('countryApp', ['ngRoute']);
+     
+      countryApp.config(function($routeProvider) {
+        $routeProvider.
+          when('/', {
+          	templateUrl: 'country-list1.html',
+            controller: 'CountryListCtrl'
+          }).
+          when('/:countryName', {
+          	templateUrl: 'country-details.html',
+            controller: 'CountryDetailCtrl'
+          }).
+          otherwise({
+            redirectTo: '/'
+          });
+      });
+
+      countryApp.factory('countries', function($http){
+      	
+      	var cachedData;
+
+      	function getData(callback){
+      		if(cachedData){
+      			callback(cachedData);
+      		}
+      		else{
+      			$http.get('countryFlag.json').success(function(data){
+      				cachedData = data;
+      				callback(data);
+      			});
+      		}
+      	}
+
+      	return {
+      		list: getData,
+      		find: function(name, callback){
+      			getData(function(data){
+      				var singleCountry = data.filter(function(entry){
+					      					return entry.name===name;
+					      				})[0];
+      				//console.log("Finding:"+singleCountry.flagURL);
+      				callback(singleCountry);
+      			});	
+      		}
+      	};
+      });
+
+      countryApp.directive('country', function(){
+      		return{
+      			scope:{
+      				country: '='
+      			},
+      			restrict: 'A',
+      			templateUrl: 'country.html',
+      			controller: function($scope,countries){
+      				countries.find($scope.country.name,function(country){
+      					$scope.flagURL = country.flagURL;
+      				});	
+      			}
+      		};
+      });
+
+      countryApp.controller('CountryListCtrl', function ($scope, $http, countries){
+        countries.list(function(countries){
+        	$scope.countries = countries;	
+        });
+          
+
+      });
+      countryApp.controller('CountryDetailCtrl', function ($scope, $http, $routeParams, countries){
+ 		$scope.param = $routeParams.countryName;
+ 		countries.list(function(countries){
+ 			$scope.countries = countries;
+ 		});
+
+ 		countries.find($scope.param,function(country){
+ 			$scope.country = country;
+ 		});
+        
+      });
+
+      countryApp.filter('encodeURI', function(){
+      		return window.encodeURI;
+      });
+    </script>
+  </head>
+  <body>
+  	<h3><a href="#/">Home</a></h3>
+    <div ng-view></div>
+  </body>
+</html>

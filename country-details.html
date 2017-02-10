@@ -1,0 +1,8 @@
+<div style="width:40%;float:left;">
+	<ul><li ng-repeat="country in countries"><a href="#/{{country.name | encodeURI}}">{{country.name}}</a></li><ul>
+</div>
+<div style="width:55%;float:left; border:1px solid black; padding:10px;">
+	<h1>{{country.name}}</h1>
+	<h2>Population : {{country.population}}</h2>
+	<img ng-src="{{country.flagURL}}" width="50%">
+</div>

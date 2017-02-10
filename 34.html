@@ -2,7 +2,7 @@
 <html ng-app="countryApp">
   <head>
     <meta charset="utf-8">
-    <title>Angular Example</title>
+    <title ng-bind="'countryApp'">{{title}}</title>
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.1/angular.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.10/angular-route.min.js"></script>
     <script>
@@ -11,11 +11,11 @@
       countryApp.config(function($routeProvider) {
         $routeProvider.
           when('/', {
-            template: '<ul><li ng-repeat="country in countries">{{country.name}}</li><ul>',
+          	templateUrl: 'country-list.html',
             controller: 'CountryListCtrl'
           }).
           when('/:countryName', {
-            template: '<h1 ng-repeat="country in countries | filter: param">{{country.name}}</h1>',
+          	templateUrl: 'country-details.html',
             controller: 'CountryDetailCtrl'
           }).
           otherwise({
@@ -23,16 +23,23 @@
           });
       });
       countryApp.controller('CountryListCtrl', function ($scope, $http){
-        $http.get('countries.json').success(function(data) {
+        $http.get('countryFlag.json').success(function(data) {
           $scope.countries = data;
+          
         });
       });
       countryApp.controller('CountryDetailCtrl', function ($scope, $http, $routeParams){
-      	$http.get('countries.json').success(function(data) {
+ 		$scope.param = $routeParams.countryName;
+
+      	$http.get('countryFlag.json').success(function(data) {
           $scope.countries = data;
+          $scope.country = data.filter(function(entry){
+          	return entry.name===$scope.param;
+          })[0];
+         
         });
-        $scope.param = $routeParams.countryName;
-        console.log($routeParams.countryName);
+       
+        
       });
     </script>
   </head>
